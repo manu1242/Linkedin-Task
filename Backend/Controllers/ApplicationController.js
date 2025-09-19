@@ -1,88 +1,51 @@
-const Application = require('../Model/Application');
-const User = require('../Model/UserModel');
+const Application = require("../Model/Application");
 
-// Submit a new business application
-const submitApplication = async (req, res) => {
+exports.submitApplication = async (req, res) => {
   try {
-    const files = (req.files || []).map(f => `/uploads/${f.filename}`);
-    const { businessName, businessType } = req.body;
-
-    const app = await Application.create({
-      applicant: req.user._id,
+    const { businessName, businessType, documents } = req.body;
+    const application = await Application.create({
+      applicant: req.User._id,
       businessName,
       businessType,
-      documents: files,
-      status: 'SUBMITTED'
+      documents,
     });
-
-    res.json(app);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(201).json(application);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Get all applications submitted by the current user
-const myApplications = async (req, res) => {
+exports.getMyApplicationStatus = async (req, res) => {
   try {
-    const apps = await Application.find({ applicant: req.user._id });
-    res.json(apps);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const application = await Application.findOne({ applicant: req.User._id });
+    if (!application) return res.status(404).json({ message: "Application not found" });
+    res.json(application);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Admin: Get all pending or submitted applications
-const pendingApplications = async (req, res) => {
+
+exports.getPendingApplications = async (req, res) => {
   try {
-    if (req.user.userType !== 'ADMIN') {
-      return res.status(403).json({ message: 'admin only' });
-    }
-
-    const apps = await Application.find({
-      status: { $in: ['SUBMITTED', 'PENDING'] }
-    }).populate('applicant', 'name email');
-
-    res.json(apps);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const applications = await Application.find({ status: "Submitted" }).populate("applicant", "name email");
+    res.json(applications);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Admin: Review and approve/reject application
-const reviewApplication = async (req, res) => {
+exports.reviewApplication = async (req, res) => {
   try {
-    if (req.user.userType !== 'ADMIN') {
-      return res.status(403).json({ message: 'admin only' });
-    }
-
-    const { action, adminNote } = req.body; // 'APPROVE' or 'REJECT'
-    const app = await Application.findById(req.params.applicationId).populate('applicant');
-
-    if (!app) return res.status(404).json({ message: 'not found' });
-
-    if (action === 'APPROVE') {
-      app.status = 'APPROVED';
-      await User.findByIdAndUpdate(app.applicant._id, {
-        businessApproved: true,
-        userType: app.applicant.userType
-      });
-    } else {
-      app.status = 'REJECTED';
-    }
-
-    app.adminNote = adminNote;
-    await app.save();
-
-    res.json(app);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const { status, adminNote } = req.body;
+    const application = await Application.findByIdAndUpdate(
+      req.params.applicationId,
+      { status, adminNote },
+      { new: true }
+    );
+    if (!application) return res.status(404).json({ message: "Application not found" });
+    res.json(application);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
-};
-
-// Export all controller functions
-module.exports = {
-  submitApplication,
-  myApplications,
-  pendingApplications,
-  reviewApplication
 };

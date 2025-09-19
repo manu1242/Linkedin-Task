@@ -13,9 +13,8 @@ const UserSchema = new mongoose.Schema({
   Password: {
     type: String,
     required: true,
-    min: 6,
-    max: 20,
   },
+
   UserType: {
     type: String,
     enum: ["REGULAR_USER", "BUSINESS_OWNER", "IT_COMPANY", "ADMIN"],
@@ -37,4 +36,4 @@ const UserSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-module.exports=mongoose.model('User',UserSchema);
+module.exports = mongoose.model("User", UserSchema);

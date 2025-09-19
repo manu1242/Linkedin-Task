@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 // Register
 const register = async (req, res) => {
   try {
-   
     const { Name, Email, Password, UserType } = req.body;
 
     if (!Email || !Password || !Name) {
@@ -27,14 +26,14 @@ const register = async (req, res) => {
       UserType: UserType || "REGULAR_USER",
     });
 
-   await Profile.create({ user: newUser._id });
+    await Profile.create({ user: newUser._id });
 
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
       expiresIn: "2d",
     });
 
     res.json({
-      Token: token,
+      token,
       User: {
         id: newUser._id,
         Email: newUser.Email,
@@ -71,7 +70,7 @@ const login = async (req, res) => {
     });
 
     res.json({
-      Token: token,
+      token,
       User: {
         id: user._id,
         Email: user.Email,
@@ -83,18 +82,16 @@ const login = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
- // Get By User Id 
 const GetByID = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.user._id).select("-Password"); // Don't send password
-    if (!user) {
+    if (!req.User) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json({ user });
+    res.json({ user: req.User });
   } catch (err) {
+    console.error("GetByID Error:", err.message);
     res.status(500).json({ message: err.message });
   }
 };
 
-
-module.exports = { register, login,GetByID };
+module.exports = { register, login, GetByID };

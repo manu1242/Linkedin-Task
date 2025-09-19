@@ -1,11 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const upload = require('../Middleware/upload');
-const ctrl = require('../Controllers/ApplicationController');
+const { submitApplication, getMyApplicationStatus, getPendingApplications, reviewApplication } = require("../controllers/applicationController");
+const { authMiddleware, adminMiddleware } = require("../Middleware/Auth");
 
-router.post('/submit', upload.array('documents', 6), ctrl.submitApplication);
-router.get('/my-status', ctrl.myApplications);
-router.get('/pending', ctrl.pendingApplications); // admin filtered at controller
-router.put('/:applicationId/review', ctrl.reviewApplication);
+router.post("/submit", authMiddleware, submitApplication);
+router.get("/my-status", authMiddleware, getMyApplicationStatus);
+router.get("/pending", authMiddleware, adminMiddleware, getPendingApplications);
+router.put("/:applicationId/review", authMiddleware, adminMiddleware, reviewApplication);
 
 module.exports = router;
