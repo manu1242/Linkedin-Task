@@ -83,7 +83,7 @@ const login = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
+ // Get By User Id 
 const GetByID = async (req, res) => {
   try {
     const user = await UserModel.findById(req.user._id).select("-Password"); // Don't send password

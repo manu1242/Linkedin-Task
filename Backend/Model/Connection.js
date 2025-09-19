@@ -1,6 +1,6 @@
-const mongoose = requires("mongoose");
+const mongoose = require("mongoose");
 
-const ConnectionSchema = new Schema({
+const ConnectionSchema = new  mongoose.Schema({
   requestId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

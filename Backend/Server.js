@@ -4,6 +4,11 @@ const cors = require("cors");
 const helmet = require("helmet");
 const AuthRoutes = require("./Routes/Auth");
 const ConnectDB = require("./config/db");
+const postRoutes = require('./Routes/posts');
+const authMiddleware = require('./Middleware/Auth');
+const profileRoutes = require('./Routes/Profile');
+const AdminRoutes = require('./Routes/Admin');
+const ConnectionRoutes = require('./Routes/connection');
 
 dotenv.config();
 const app = express();
@@ -21,6 +26,10 @@ app.use(cors({
 app.use(express.json()); // IMPORTANT: To parse JSON request body
 
 app.use("/api/auth", AuthRoutes);
+app.use("/api/posts",authMiddleware,postRoutes)
+app.use('/api/profile',authMiddleware,profileRoutes)
+app.use('/api/admin',authMiddleware,AdminRoutes);
+app.use('/api/connections',authMiddleware,ConnectionRoutes)
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose; 
+
 const ApplicationSchema = new Schema({
   applicant: {
     type: Schema.Types.ObjectId,
@@ -7,7 +9,7 @@ const ApplicationSchema = new Schema({
   },
   businessName: String,
   businessType: String,
-  documents: [Stringh],
+  documents: [String], // ✅ Fix: Stringh ➜ String
   status: {
     type: String,
     enum: ["Submitted", "Pending", "Approved", "Rejected"],

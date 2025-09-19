@@ -1,4 +1,4 @@
-const mongoose = reqiure("mongoose");
+const mongoose = require("mongoose");
 
 const PostSchema = new mongoose.Schema(
   {
@@ -33,9 +33,12 @@ const PostSchema = new mongoose.Schema(
       },
     ],
     shares: {
-      type: Number,
-      default: 0,
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: [],
     },
   },
   { timestamps: true }
 );
+
+module.exports = mongoose.model("post", PostSchema);
