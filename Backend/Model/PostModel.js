@@ -13,10 +13,9 @@ const PostSchema = new mongoose.Schema(
     images: [String],
     PostType: {
       type: String,
-      enum: ["GENERAL", "BUSINESS_UPDATE", "ACHIEVEMENT", "JOB_POSTING"],
-      default: "GENERAL",
+      enum: ["REGULAR_Update", "ACHIEVEMENT", "JOB_POSTING"],
+      default: "General",
     },
-
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,79 +1,32 @@
 const Profile = require("../Model/Profile");
 const User = require("../Model/UserModel");
 
-// Get profile by user ID
 exports.getProfileByUserId = async (req, res) => {
-  try {
-    const profile = await Profile.findOne({ user: req.params.userId }).populate(
-      "user",
-      "Name Email avatar UserType businessApproved"
-    );
-
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
-
-    res.json(profile);
-  } catch (err) {
-    console.error("getProfileByUserId error:", err.message);
-    res.status(500).json({ message: "Server error" });
-  }
+  const profile = await Profile.findOne({ user: req.params.userId }).populate(
+    "user",
+    "name email avatar userType businessApproved"
+  );
+  if (!profile) return res.status(404).json({ message: "Not found" });
+  res.json(profile);
 };
 
-// Get logged-in user's profile
-exports.getMyProfile = async (req, res) => {
-  try {
-    const profile = await Profile.findOne({ user: req.User._id }).populate(
-      "user",
-      "Name Email avatar UserType businessApproved"
-    );
-
-    if (!profile) return res.status(404).json({ message: "Profile not found" });
-
-    res.json(profile);
-  } catch (err) {
-    console.error("getMyProfile error:", err.message);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// Update logged-in user's profile
 exports.updateMyProfile = async (req, res) => {
-  try {
-    const updates = req.body;
-
-    // Update or create profile
-    let profile = await Profile.findOneAndUpdate(
-      { user: req.User._id },
-      { $set: updates },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
-
-    // Populate user fields before returning
-    profile = await profile.populate("user", "Name Email UserType avatar businessApproved");
-
-    res.json(profile);
-  } catch (err) {
-    console.error("updateMyProfile error:", err.message);
-    res.status(500).json({ message: "Server error updating profile" });
-  }
+  const updates = req.body;
+  const profile = await Profile.findOneAndUpdate(
+    { user: req.user._id },
+    { $set: updates },
+    { new: true, upsert: true }
+  );
+  res.json(profile);
 };
 
-// Upload avatar
 exports.uploadAvatar = async (req, res) => {
-  if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+  if (!req.file) return res.status(400).json({ message: "No file" });
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { avatar: `/uploads/${req.file.filename}` },
+    { new: true }
+  );
 
-  try {
-    // Use full URL for avatar path
-    const avatarPath = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-
-    const user = await User.findByIdAndUpdate(
-      req.User._id,
-      { avatar: avatarPath },
-      { new: true }
-    );
-
-    res.json({ avatar: user.avatar });
-  } catch (err) {
-    console.error("uploadAvatar error:", err.message);
-    res.status(500).json({ message: "Server error uploading avatar" });
-  }
+  res.json({ avatar: user.avatar });
 };
